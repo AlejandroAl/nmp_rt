@@ -146,13 +146,50 @@ GET riesgo_transaccional/_search
          "importe": 800.06
        }}
      }
-   },
-   "script_fields": {
-     "EsMayor": {
-       "script": {
-         "lang": "painless",
-         "source":" if(doc['importe'].value > 1000){ return true;}else{ return false}"
-       }
-     }
    }
 }
+
+
+
+GET riesgo_transaccional/_search
+
+
+GET riesgo_transaccional/_search
+{
+  "query": {
+    "has_parent": {
+      "parent_type": "transaccion",
+      "query": {
+        "match": {
+          "idCliente": "666666"
+        }
+      }
+    },"has_child": {
+      "type": "movimiento",
+      "query": {
+        "match": {
+          "OXXO_medioPago": "100.01"
+        }
+      }
+    }
+  }, "aggs": {
+    "EntreMeses": {
+      "range": {
+        "field": "fechaMovimiento",
+        "ranges": [
+          {
+            "from": "now-4M/M",
+            "to": "now"
+          }
+        ]
+      },"aggs": {
+        "Sumapp": {
+          "sum": {
+            "field": "importe"
+          }
+        }
+      }
+    }
+  }
+}
+
