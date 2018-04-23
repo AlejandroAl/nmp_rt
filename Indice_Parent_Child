@@ -88,33 +88,71 @@ PUT riesgo_transaccional/movimiento/4?parent=1
 
 GET riesgo_transaccional/_search
 
-
-
-GET riesgo_transaccional/transaccion/_search
-
-{
-  "query": {
-
-    "has_child": {
-
-      "type": "movimiento"
-
-    }
-
-  }
-}
-
+GET riesgo_transaccional/_search
 
 GET riesgo_transaccional/_search/template
 {
   "source" : {
-    "query": {
-      "has_parent" : {
-        "parent_type": "{{my_field}}"
+   "query": {
+
+    "has_parent": {
+
+      "parent_type": "transaccion",
+
+      "query": {
+
+         "match": {
+           
+           "idCliente": "{{param1}}"
+           
+         }
       }
     }
+   }, "aggs": {
+     "Importe": {
+       "filter": {"term": {
+         "importe": "{{param2}}"
+       }}
+     }
+   }
   },
-    "params" : {
-        "my_field" : "none"
+  "params": {
+    "param1":"666666",
+    "param2": 800.06
+  }
+}
+
+
+GET riesgo_transaccional/_search
+{
+"query": {
+
+    "has_parent": {
+
+      "parent_type": "transaccion",
+
+      "query": {
+
+         "match": {
+           
+           "idCliente": "666666"
+           
+         }
+      }
     }
+   }, "aggs": {
+     "Importe": {
+       "filter": {"term": {
+         "importe": 800.06
+       }}
+     }
+   },
+   "script_fields": {
+     "EsMayor": {
+       "script": {
+         "lang": "painless",
+         "source":" if(doc['importe'].value > 1000){ return true;}else{ return false}"
+       }
+     }
+   }
 }
