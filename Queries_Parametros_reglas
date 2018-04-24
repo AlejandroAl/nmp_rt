@@ -1,0 +1,187 @@
+GET _search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+PUT riesgo_transaccional
+{
+  "mappings": {
+    "transaccion": {},
+    "movimiento": {
+      "_parent": {
+        "type": "transaccion" 
+      }
+    }
+  }
+}
+
+
+PUT riesgo_transaccional_test/transaccion/1
+{
+  "idContrato":"106269443",
+  "idTransaccion":"456783-4444-444",
+  "idCliente":"666666",
+  "empleado":"abernald",
+  "montoCredito": 600,
+  "fechaSolicitud":"2017-12-30T12:47:07-0600",
+  "fechaDesembolso": "2017-12-30T12:47:07-0600",
+  "sucursal": 0,
+  "ramo_datosGarantia":"AL",
+  "subRamo_datosGarantia":"AL",
+  "idGarantia_datosGarantia":"4567",
+  "tasaMensual_datosCredito":0.04,
+  "tasaAnual_datosCredito":0.48,
+  "plazoMeses_datosCredito":5,
+  "frecuenciaDias_datosCredito":null,
+  "frecuenciaMeses_datosCredito":5,
+  "refrendos_datosCredito":0,
+  "idContratoAnterior_datosCredito":"106269443",
+  "estatusCaja_estautusCredito":"PP",
+  "estatusGarantia_estautusCredito":"VA",
+  "ultimaFechaActualizacion_estautusCredito":"2017-12-30T12:47:07-0600",
+  "estatusCajaAnterior_HistoriaEstatus":"",
+  "estatusGarantiaAnterior_HistoriaEstatus":"",
+  "idRegla_RiesgoTransaccional":["ROBR-01","ROBR-02"],
+  "nivelRiesgo_RiesgoTransaccional":["01-NORMAL","02-NORMAL"],
+  "scoreRiesgo_RiesgoTransaccional":[80,90],
+  "idCaso_RiesgoTransaccional":["JKLM98","JKLM99"]
+}
+
+
+PUT riesgo_transaccional_test/movimiento/1?parent=1 
+{
+  "idCliente": "666666",
+    "idContrato": "106269443",
+        "origenMovimiento":"BAM",
+        "tipoMovimiento":"CAJA",
+        "fechaMovimiento": "2018-01-30T12:47:07-0600",
+        "fechaAplicacion":"2018-01-30T12:47:07-0600",
+        "fechaConciliacion": "2018-01-30T12:47:07-0600",
+        "estatus":"APLICADO",
+        "nivelRiesgoMovimiento":"01-NORMAL",
+        "scoreRiesgoMovimiento":80,
+        "claveMovimiento": "PP",
+        "descripcionMovimiento":"Empeño",
+        "nombreMovimiento":"Pago de Préstamo",
+        "sucursalActual": 0,
+        "sucursal": 0,
+        "geocodificacionSucursal": null,
+        "importe": 800.06,
+        "efectivo_medioPago":100.01,
+        "tarjetaCrédito_medioPago":100.01,
+        "SPEI_medioPago": 100.01,
+        "pagoEnLinea_medioPago":100.01,
+        "OXXO_medioPago": 100.01,
+        "Banamex_medioPago":100.01,
+        "empleado":"gperezg",
+        "idRegla_RiesgoTransaccional":"ROBR-01",
+        "nivelRiesgo_RiesgoTransaccional":"01-NORMAL",
+        "scoreRiesgo_RiesgoTransaccional":80,
+        "idCaso_RiesgoTransaccional":"JKLM98"
+
+}
+
+
+
+
+GET riesgo_transaccional/_search
+
+GET riesgo_transaccional/_search
+
+GET riesgo_transaccional/_search/template
+{
+  "source" : {
+   "query": {
+
+    "has_parent": {
+
+      "parent_type": "transaccion",
+
+      "query": {
+
+         "match": {
+           
+           "idCliente": "{{param1}}"
+           
+         }
+      }
+    }
+   }, "aggs": {
+     "Importe": {
+       "filter": {"term": {
+         "importe": "{{param2}}"
+       }}
+     }
+   }
+  },
+  "params": {
+    "param1":"666666",
+    "param2": 800.06
+  }
+}
+
+
+GET riesgo_transaccional/_search
+{
+"query": {
+
+    "has_parent": {
+
+      "parent_type": "transaccion",
+
+      "query": {
+
+         "match": {
+           
+           "idCliente": "666666"
+           
+         }
+      }
+    }
+   }, "aggs": {
+     "Importe": {
+       "filter": {"term": {
+         "importe": 800.06
+       }}
+     }
+   }
+}
+
+
+
+GET riesgo_transaccional/_search
+
+
+GET riesgo_transaccional_test/_search
+{
+  "query": {
+    "has_parent": {
+      "parent_type": "transaccion",
+      "query": {
+        "match": {
+          "idCliente": "666666"
+        }
+      }
+    }
+  }, "aggs": {
+    "EntreMeses": {
+      "range": {
+        "field": "fechaMovimiento",
+        "ranges": [
+          {
+            "from": "now-4M/M",
+            "to": "now"
+          }
+        ]
+      },"aggs": {
+        "Sumapp": {
+          "sum": {
+            "field": "importe"
+          }
+        }
+      }
+    }
+  }
+}
