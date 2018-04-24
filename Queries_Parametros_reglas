@@ -185,3 +185,71 @@ GET riesgo_transaccional_test/_search
     }
   }
 }
+
+
+
+
+
+
+
+GET riesgo_transaccional/_search
+{
+  "query": {
+    "has_parent": {
+      "parent_type": "transaccion",
+      "query": {
+        "match": {
+          "idCliente": "666666"
+        }
+      }
+    }
+  }, "aggs": {
+    "MesCorriente": {
+      "date_histogram": {
+        "field": "fechaMovimiento",
+        "interval": "month"
+      },"aggs": {
+        "SumaPP_MC": {
+          "sum": {
+            "field": "importe"
+          }
+        }
+      }
+    }
+  }
+}
+
+GET riesgo_transaccional/_search
+{
+    "query": {
+        "bool" : {
+            "must" : {
+                "script" : {
+                    "script" : {
+                        "source": "doc['fechaMovimiento'].value > 2018-01-01",
+                        "lang": "painless"
+                     }
+                }
+            }
+        }
+    }
+}
+
+
+
+GET riesgo_transaccional/_search
+{
+    "query": {
+    "match_all": {}
+  },
+  "sort": {
+    "_script": {
+      "type": "string",
+      "order": "asc",
+      "script": {
+        "lang": "painless",
+        "source": "Calendar.getInstance().getTime();"
+      }
+    }
+  }
+}
