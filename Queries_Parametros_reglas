@@ -59,3 +59,110 @@ GET riesgo_transaccional/_search
     }
   }
 }
+
+
+
+
+
+
+
+GET riesgo_transaccional/_search
+{
+  "query": {
+    "has_parent": {
+      "parent_type": "transaccion",
+      "query": {
+        "match": {
+          "idCliente": "666666"
+        }
+      }
+    }
+  }, "aggs": {
+    "MesCorriente": {
+      "date_histogram": {
+        "field": "fechaMovimiento",
+        "interval": "month"
+      },"aggs": {
+        "SumaPP_MC": {
+          "sum": {
+            "field": "importe"
+          }
+        }
+      }
+    }
+  }
+}
+
+GET riesgo_transaccional/_search
+{
+    "query": {
+        "bool" : {
+            "must" : {
+                "script" : {
+                    "script" : {
+                        "source": "int cal = Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH); if(20 < cal){return true; }else {return false}",
+                        "lang": "painless"
+                     }
+                }
+            }
+        }
+    }
+}
+
+
+
+GET riesgo_transaccional/_search
+{
+    "query": {
+    "match_all": {}
+  },
+  "sort": {
+    "_script": {
+      "type": "string",
+      "order": "asc",
+      "script": {
+        "lang": "painless",
+        "source": "int cal = Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH); 'Este es el ultimo dia de este mes '+cal; "
+      }
+    }
+  }
+}
+
+
+
+GET riesgo_transaccional/_search
+{
+    "query": {
+    "match_all": {}
+  },
+  "sort": {
+    "_script": {
+      "type": "string",
+      "order": "asc",
+      "script": {
+        "lang": "painless",
+        "source": "int dia = doc['fechaMovimiento'].date.dayOfMonth; int mes = doc['fechaMovimiento'].date.monthOfYear; int anio = doc['fechaMovimiento'].date.year;String lastDay = String.valueOf(Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH)); int moth = Calendar.getInstance().get(Calendar.MONTH)+1; String year = String.valueOf(Calendar.getInstance().get(Calendar.YEAR)); String dateactual = anio+'-'+ mes + '-'+dia; Calendar cal = Calendar.getInstance(); SimpleDateFormat sdf = new SimpleDateFormat('yyyy-MM-dd', Locale.getDefault()); cal.setTime(sdf.parse(dateactual)); if(cal.getTime().before(Calendar.getInstance().getTime())){true}else{false}"
+      }
+    }
+  }
+}
+
+
+GET riesgo_transaccional
+
+GET riesgo_transaccional/_search
+{
+    "query": {
+    "match_all": {}
+  },
+  "sort": {
+    "_script": {
+      "type": "string",
+      "order": "asc",
+      "script": {
+        "lang": "painless",
+        "source": "SimpleDateFormat sdf = new SimpleDateFormat('yyyy-MM-dd', Locale.getDefault()); int dia = doc['fechaMovimiento'].date.dayOfMonth; int mes = doc['fechaMovimiento'].date.monthOfYear; int anio = doc['fechaMovimiento'].date.year;String dateactual = anio+'-0'+ mes + '-'+dia; dateactual"
+      }
+    }
+  }
+}
